@@ -1,3 +1,4 @@
+import { APP_NAME, DEFAULT_SERVER_URL } from '../../../env-config/config';
 
 export default {
     /**
@@ -13,7 +14,7 @@ export default {
     /**
      * Application name.
      */
-    appName: 'Jitsi Meet',
+    appName: APP_NAME || "Jitsi Meet",
 
     /**
     * The prefix for application protocol.
@@ -24,7 +25,7 @@ export default {
     /**
      * The default server URL of Jitsi Meet Deployment that will be used.
      */
-    defaultServerURL: 'https://meet.jit.si',
+    defaultServerURL: DEFAULT_SERVER_URL || 'https://meet.jit.si',
 
     /**
      * The default server Timeout in seconds.
