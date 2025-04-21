@@ -1,0 +1,35 @@
+# Dependency directories
+/node_modules
+
+# TypeScript compiled JavaScript files
+dist/
+
+# TypeScript declaration files
+*.d.ts
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Log files
+*.log
+*.log.*
+
+# Environment files
+.env
+
+# Editor directories and files
+.vscode/
+*.swp
+*.swo
+.idea/
+
+# Mac files 
+.ds_store
+
+# Ignore zip & tar files
+*.zip
+*.tar
+*.7z
