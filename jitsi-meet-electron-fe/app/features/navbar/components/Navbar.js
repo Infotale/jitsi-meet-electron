@@ -7,8 +7,6 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 
 import { SettingsButton, SettingsDrawer } from '../../settings';
-
-import HelpButton from './HelpButton';
 import Logo from './Logo';
 
 type Props = {
@@ -43,9 +41,7 @@ class Navbar extends Component<Props, *> {
      */
     _getSecondaryActions() {
         return [
-            <AkGlobalItem key = { 0 }>
-                <HelpButton />
-            </AkGlobalItem>
+            <AkGlobalItem key = { 0 }></AkGlobalItem>
         ];
     }
 
