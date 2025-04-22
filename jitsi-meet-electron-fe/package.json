@@ -18,7 +18,9 @@
     "start:electron": "webpack --config ./webpack.main.js --mode development && electron ./build/main.js",
     "localhost": "node dev-server.js",
     "start:web": "webpack serve --config webpack.dev.js  --mode development",
-    "electron:dev": "node electron-dev.js"
+    "electron:dev": "node electron-dev.js",
+    "predist:dev": "webpack --config ./webpack.main.js --mode development",
+    "dist:dev": "electron-builder --win --config electron-builder-dev.json"
   },
   "engines": {
     "node": ">=14.0.0"

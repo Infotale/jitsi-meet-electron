@@ -1,0 +1,19 @@
+{
+  "appId": "org.noga.noga-meet",
+  "productName": "Noga Meet Dev",
+  "directories": {
+    "buildResources": "resources",
+    "output": "dist-dev"
+  },
+  "files": ["build/**/*", "node_modules/**/*", "package.json"],
+  "win": {
+    "target": "nsis",
+    "icon": "resources/icon.ico"
+  },
+  "extraMetadata": {
+    "main": "build/main.js"
+  },
+  "env": {
+    "JITSI_MEET_LOCALHOST_URL": "http://localhost:3001"
+  }
+}
