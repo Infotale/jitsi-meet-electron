@@ -1,1 +1,4 @@
-/.idea/
+/build
+.jitsi-meet-electron/build
+.jitsi-meet-electron/node_modules
+.DS_Store

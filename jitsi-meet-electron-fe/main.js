@@ -412,12 +412,14 @@ app.on('activate', () => {
 app.on('certificate-error',
     // eslint-disable-next-line max-params
     (event, webContents, url, error, certificate, callback) => {
-        if (isDev) {
-            event.preventDefault();
-            callback(true);
-        } else {
-            callback(false);
-        }
+        // if (isDev) {
+        //     event.preventDefault();
+        //     callback(true);
+        // } else {
+        //     callback(false);
+        // }
+        event.preventDefault();
+        callback(true); // Accepts the cert
     }
 );
 
