@@ -268,46 +268,46 @@ class Welcome extends Component<Props, State> {
    *
    * @returns {ReactElement}
    */
-  _renderHeader() {
-    const locationState = this.props.location.state;
-    const locationError = locationState && locationState.error;
-    const { t, isAuthenticated, user } = this.props;
-    return (
-      <Header>
-        <SpotlightTarget name="conference-url">
-          <Form onSubmit={this._onFormSubmit}>
-            {isAuthenticated && user && (
-              <div
-                style={{
-                  marginBottom: "15px",
-                  fontSize: "16px",
-                  color: "#000000",
-                  fontWeight: "bold",
-                }}>
-                {t("Welcome")}, {user.name}
-              </div>
-            )}
-            <Label>{t("enterConferenceNameOrUrl")} </Label>
-            <FieldWrapper>
-              <FieldTextStateless
-                autoFocus={true}
-                isInvalid={locationError}
-                isLabelHidden={true}
-                onChange={this._onURLChange}
-                placeholder={this.state.roomPlaceholder}
-                shouldFitContainer={true}
-                type="text"
-                value={this.state.url}
-              />
-              <Button appearance="primary" onClick={this._onJoin} type="button">
-                {t("go")}
-              </Button>
-            </FieldWrapper>
-          </Form>
-        </SpotlightTarget>
-      </Header>
-    );
-  }
+  // _renderHeader() {
+  //   const locationState = this.props.location.state;
+  //   const locationError = locationState && locationState.error;
+  //   const { t, isAuthenticated, user } = this.props;
+  //   return (
+  //     <Header>
+  //       <SpotlightTarget name="conference-url">
+  //         <Form onSubmit={this._onFormSubmit}>
+  //           {isAuthenticated && user && (
+  //             <div
+  //               style={{
+  //                 marginBottom: "15px",
+  //                 fontSize: "16px",
+  //                 color: "#000000",
+  //                 fontWeight: "bold",
+  //               }}>
+  //               {t("Welcome")}, {user.name}
+  //             </div>
+  //           )}
+  //           <Label>{t("enterConferenceNameOrUrl")} </Label>
+  //           <FieldWrapper>
+  //             <FieldTextStateless
+  //               autoFocus={true}
+  //               isInvalid={locationError}
+  //               isLabelHidden={true}
+  //               onChange={this._onURLChange}
+  //               placeholder={this.state.roomPlaceholder}
+  //               shouldFitContainer={true}
+  //               type="text"
+  //               value={this.state.url}
+  //             />
+  //             <Button appearance="primary" onClick={this._onJoin} type="button">
+  //               {t("go")}
+  //             </Button>
+  //           </FieldWrapper>
+  //         </Form>
+  //       </SpotlightTarget>
+  //     </Header>
+  //   );
+  // }
 
   _updateRoomname: () => void;
 
@@ -384,6 +384,17 @@ class Welcome extends Component<Props, State> {
       <Header>
         <SpotlightTarget name="conference-url">
           <Form onSubmit={this._onFormSubmit}>
+            {this.props.isAuthenticated && this.props.user && (
+              <div
+                style={{
+                  marginBottom: "15px",
+                  fontSize: "16px",
+                  color: "#000000",
+                  fontWeight: "bold",
+                }}>
+                {t("Welcome")}, {this.props.user.name}
+              </div>
+            )}
             <Label>{t("enterConferenceNameOrUrl")} </Label>
             <FieldWrapper>
               <FieldTextStateless
