@@ -57,16 +57,30 @@ class UpcomingMeetings extends Component<Props, *> {
                     <span className={"dayOfWeek"}>{ this._renderTodayDayOfAWeek(meeting.startDate) }</span>
                     <span className={"day"}>{ this._renderTodayDay(meeting.startDate) }</span>
                 </MeetingDate>
-                <Wrapper>
-                    <MeetingTime></MeetingTime>
-                    <MeetingLocation></MeetingLocation>
+                <Wrapper className={"rows"}>
+                    <MeetingTime>
+                        <span>{ this._renderTime(meeting.startDate) } - { this._renderTime(meeting.endDate) }</span>
+                    </MeetingTime>
+                    <MeetingLocation>
+                        <span>{ meeting.location }</span>
+                    </MeetingLocation>
                 </Wrapper>
-                <Wrapper>
-                    <MeetingDescription></MeetingDescription>
-                    <MeetingParticipants></MeetingParticipants>
+                <Wrapper className={"rows"}>
+                    <MeetingDescription>{ meeting.title }</MeetingDescription>
+                    <MeetingParticipants>
+                        {meeting.participants.map((participant) => {
+                            return (
+                                <img key={participant.id} alt={participant.name} src={participant.avatar} />
+                            );
+                        })}
+                    </MeetingParticipants>
                 </Wrapper>
             </MeetingCard>
         );
+    }
+
+    _renderTime(date: Date){
+        return moment(date).format('LT');
     }
 
     _renderTodayDay(date: Date) {

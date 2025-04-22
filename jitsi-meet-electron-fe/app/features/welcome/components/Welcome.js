@@ -9,8 +9,8 @@ import { AtlasKitThemeProvider } from '@atlaskit/theme';
 import { generateRoomWithoutSeparator } from '@jitsi/js-utils/random';
 import React, { Component } from 'react';
 import { withTranslation } from 'react-i18next';
-import { compose } from 'redux';
 import type { Dispatch } from 'redux';
+import { compose } from 'redux';
 import { connect } from 'react-redux';
 import { push } from 'react-router-redux';
 
@@ -20,6 +20,7 @@ import { RecentList } from '../../recent-list';
 import { createConferenceObjectFromURL } from '../../utils';
 
 import { Body, FieldWrapper, Form, Header, Label, Wrapper } from '../styled';
+import { UpcomingMeetings } from '../../upcoming-meetings';
 
 type Props = {
 
@@ -246,6 +247,7 @@ class Welcome extends Component<Props, State> {
         return (
             <Body>
                 <RecentList />
+                <UpcomingMeetings />
             </Body>
         );
     }

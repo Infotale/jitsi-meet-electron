@@ -57,8 +57,8 @@ class RecentList extends Component<Props, *> {
 
         return (
             <RecentListWrapper>
-                <Label>{ t('recentListLabel') }</Label>
                 <RecentListContainer>
+                    <Label>{ t('recentListLabel') }</Label>
                     {
                         this.props._recentList.map(
                             conference => this._renderRecentListEntry(conference)

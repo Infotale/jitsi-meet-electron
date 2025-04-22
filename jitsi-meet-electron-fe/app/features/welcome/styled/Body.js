@@ -3,7 +3,10 @@
 import styled from 'styled-components';
 
 export default styled.div`
-    margin: 0 12.5%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    align-items: center;
     overflow: scroll;
 
     ::-webkit-scrollbar {

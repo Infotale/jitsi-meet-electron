@@ -9,8 +9,8 @@ export function getMeetings() {
             endDate: moment().set({ hour: 12, minute: 0, second: 0, millisecond: 0 }),
             location: 'Zoom',
             participants: [
-                { id: 'u1', name: 'Alice', avatarUrl: 'https://i.pravatar.cc/40?img=1' },
-                { id: 'u2', name: 'Bob', avatarUrl: 'https://i.pravatar.cc/40?img=2' }
+                { id: 'u1', name: 'Alice', avatar: 'https://i.pravatar.cc/40?img=1' },
+                { id: 'u2', name: 'Bob', avatar: 'https://i.pravatar.cc/40?img=2' }
             ]
         },
         {
@@ -20,7 +20,7 @@ export function getMeetings() {
             endDate: moment().set({ hour: 12, minute: 45, second: 0, millisecond: 0 }),
             location: 'Room 101',
             participants: [
-                { id: 'u3', name: 'Charlie', avatarUrl: 'https://i.pravatar.cc/40?img=3' }
+                { id: 'u3', name: 'Charlie', avatar: 'https://i.pravatar.cc/40?img=3' }
             ]
         }
     ]

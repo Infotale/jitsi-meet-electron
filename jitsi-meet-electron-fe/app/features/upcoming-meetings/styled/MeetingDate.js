@@ -3,6 +3,8 @@
 import styled from 'styled-components';
 
 export default styled.div`
+    width: 5rem;
+    height: 5rem;
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
@@ -11,9 +13,11 @@ export default styled.div`
     align-items: center;
     font-size: 1.5rem;
     
-    .dayOfWeek {}
+    .dayOfWeek {
+        
+    }
     
-    .day{
+    .day {
         font-size: 2rem;
     }
 `;
