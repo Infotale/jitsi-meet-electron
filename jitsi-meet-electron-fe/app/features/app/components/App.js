@@ -12,6 +12,7 @@ import config from "../../config";
 import { history } from "../../router";
 import { createConferenceObjectFromURL } from "../../utils";
 import { Welcome } from "../../welcome";
+import { AUTH_SET_AUTHENTICATED } from "../../redux/actionTypes/auth";
 
 const API_URL = "http://localhost:3000";
 
@@ -19,76 +20,83 @@ const API_URL = "http://localhost:3000";
  * Wrapper component to handle authentication
  */
 const PrivateComponent = ({ component: Component, ...rest }) => {
-  const [isAuthenticated, setIsAuthenticated] = React.useState(false);
   const [isCheckingAuth, setIsCheckingAuth] = React.useState(true);
   const authCheckPerformed = React.useRef(false);
+  const dispatch = rest.dispatch; // Get dispatch from props
 
   React.useEffect(() => {
-    // Only run this once
     if (authCheckPerformed.current) return;
     authCheckPerformed.current = true;
 
     const checkAuth = async () => {
       console.log("Checking authentication");
 
-      // Check URL parameters first
-      const urlParams = new URLSearchParams(window.location.search);
-      const accessToken = urlParams.get("accessToken");
-      const refreshToken = urlParams.get("refreshToken");
+      try {
+        // Check URL parameters first
+        const urlParams = new URLSearchParams(window.location.search);
+        const accessToken = urlParams.get("accessToken");
+        const refreshToken = urlParams.get("refreshToken");
 
-      if (accessToken) {
-        console.log("Found token in URL");
-        // Store tokens in localStorage or memory
-        localStorage.setItem("accessToken", accessToken);
-        if (refreshToken) {
-          localStorage.setItem("refreshToken", refreshToken);
+        let tokenToUse = accessToken;
+
+        if (accessToken) {
+          console.log("Found token in URL");
+          localStorage.setItem("accessToken", accessToken);
+          if (refreshToken) {
+            localStorage.setItem("refreshToken", refreshToken);
+          }
+        } else {
+          // If no URL tokens, check stored token
+          tokenToUse = localStorage.getItem("accessToken");
         }
 
-        // Clean up URL
-        window.history.replaceState({}, document.title, window.location.pathname);
+        if (!tokenToUse) {
+          console.log("No token available, redirecting to login");
+          window.location.href = `${API_URL}/auth/login`;
+          return;
+        }
 
-        setIsAuthenticated(true);
-        setIsCheckingAuth(false);
-        return;
-      }
-
-      // If no URL tokens, check stored token
-      const storedToken = localStorage.getItem("accessToken");
-
-      if (!storedToken) {
-        console.log("No stored token, redirecting to login");
-        window.location.href = `${API_URL}/auth/login`;
-        return;
-      }
-
-      try {
-        // Verify the stored token
+        // Verify the token
         const response = await fetch(`${API_URL}/auth/verify-token`, {
           headers: {
-            Authorization: `Bearer ${storedToken}`,
+            Authorization: `Bearer ${tokenToUse}`,
             Accept: "application/json",
-            "Content-Type": "application/json",
           },
         });
 
+        console.log("Verify token response status:", response.status);
+
         if (response.ok) {
           const data = await response.json();
+          console.log("Auth verification response:", data);
+
           if (data.authenticated) {
-            console.log("Stored token is valid");
-            setIsAuthenticated(true);
+            console.log("Dispatching authentication with payload:", {
+              accessToken: tokenToUse,
+              refreshToken: localStorage.getItem("refreshToken"),
+              user: data.user,
+            });
+
+            dispatch({
+              type: AUTH_SET_AUTHENTICATED,
+              payload: {
+                accessToken: tokenToUse,
+                refreshToken: localStorage.getItem("refreshToken"),
+                user: data.user,
+              },
+            });
             setIsCheckingAuth(false);
             return;
           }
         }
 
-        // If token verification failed, try refresh token
-        const refreshToken = localStorage.getItem("refreshToken");
-        if (refreshToken) {
+        // If verification failed, try refresh token
+        const storedRefreshToken = localStorage.getItem("refreshToken");
+        if (storedRefreshToken) {
           const refreshResponse = await fetch(`${API_URL}/auth/refresh-token`, {
             headers: {
-              Authorization: `Bearer ${refreshToken}`,
+              Authorization: `Bearer ${storedRefreshToken}`,
               Accept: "application/json",
-              "Content-Type": "application/json",
             },
           });
 
@@ -98,7 +106,15 @@ const PrivateComponent = ({ component: Component, ...rest }) => {
             if (refreshData.refreshToken) {
               localStorage.setItem("refreshToken", refreshData.refreshToken);
             }
-            setIsAuthenticated(true);
+
+            dispatch({
+              type: AUTH_SET_AUTHENTICATED,
+              payload: {
+                accessToken: refreshData.accessToken,
+                refreshToken: refreshData.refreshToken,
+                user: refreshData.user,
+              },
+            });
             setIsCheckingAuth(false);
             return;
           }
@@ -116,14 +132,17 @@ const PrivateComponent = ({ component: Component, ...rest }) => {
     };
 
     checkAuth();
-  }, []);
+  }, [dispatch]);
 
   if (isCheckingAuth) {
     return <div>Checking authentication...</div>;
   }
 
-  return isAuthenticated ? <Component {...rest} /> : <div>Redirecting to login...</div>;
+  return <Component {...rest} />;
 };
+
+// Make sure PrivateComponent is connected to Redux
+const ConnectedPrivateComponent = connect()(PrivateComponent);
 
 /**
  * Main component encapsulating the entire application.
@@ -214,11 +233,11 @@ class App extends Component<*> {
             <Route
               exact={true}
               path="/"
-              render={(props) => <PrivateComponent component={Welcome} {...props} />}
+              render={(props) => <ConnectedPrivateComponent component={Welcome} {...props} />}
             />
             <Route
               path="/conference"
-              render={(props) => <PrivateComponent component={Conference} {...props} />}
+              render={(props) => <ConnectedPrivateComponent component={Conference} {...props} />}
             />
           </Switch>
         </Router>

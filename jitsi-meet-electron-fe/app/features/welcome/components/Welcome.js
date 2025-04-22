@@ -1,316 +1,344 @@
 // @flow
 
-import Button from '@atlaskit/button';
-import { FieldTextStateless } from '@atlaskit/field-text';
-import { SpotlightTarget } from '@atlaskit/onboarding';
-import Page from '@atlaskit/page';
-import { AtlasKitThemeProvider } from '@atlaskit/theme';
+import Button from "@atlaskit/button";
+import { FieldTextStateless } from "@atlaskit/field-text";
+import { SpotlightTarget } from "@atlaskit/onboarding";
+import Page from "@atlaskit/page";
+import { AtlasKitThemeProvider } from "@atlaskit/theme";
 
-import { generateRoomWithoutSeparator } from '@jitsi/js-utils/random';
-import React, { Component } from 'react';
-import { withTranslation } from 'react-i18next';
-import { compose } from 'redux';
-import type { Dispatch } from 'redux';
-import { connect } from 'react-redux';
-import { push } from 'react-router-redux';
+import { generateRoomWithoutSeparator } from "@jitsi/js-utils/random";
+import React, { Component } from "react";
+import { withTranslation } from "react-i18next";
+import { compose } from "redux";
+import type { Dispatch } from "redux";
+import { connect } from "react-redux";
+import { push } from "react-router-redux";
 
-import { Navbar } from '../../navbar';
-import { Onboarding, startOnboarding } from '../../onboarding';
-import { RecentList } from '../../recent-list';
-import { createConferenceObjectFromURL } from '../../utils';
+import { Navbar } from "../../navbar";
+import { Onboarding, startOnboarding } from "../../onboarding";
+import { RecentList } from "../../recent-list";
+import { createConferenceObjectFromURL } from "../../utils";
 
-import { Body, FieldWrapper, Form, Header, Label, Wrapper } from '../styled';
+import { Body, FieldWrapper, Form, Header, Label, Wrapper } from "../styled";
 
 type Props = {
+  /**
+   * Redux dispatch.
+   */
+  dispatch: Dispatch<*>,
 
-    /**
-     * Redux dispatch.
-     */
-    dispatch: Dispatch<*>;
+  /**
+   * React Router location object.
+   */
+  location: Object,
 
-    /**
-     * React Router location object.
-     */
-    location: Object;
+  /**
+   * I18next translate function.
+   */
+  t: Function,
 
-    /**
-     * I18next translate function.
-     */
-     t: Function;
+  /**
+   * Whether user is authenticated
+   */
+  isAuthenticated: boolean,
+
+  /**
+   * User information from Keycloak
+   */
+  user: ?{
+    sub: string,
+    email_verified: boolean,
+    name: string,
+    preferred_username: string,
+    given_name: string,
+    family_name: string,
+    email: string,
+  },
 };
 
 type State = {
+  /**
+   * Timer for animating the room name geneeration.
+   */
+  animateTimeoutId: ?TimeoutID,
 
-    /**
-     * Timer for animating the room name geneeration.
-     */
-    animateTimeoutId: ?TimeoutID,
+  /**
+   * Generated room name.
+   */
+  generatedRoomname: string,
 
-    /**
-     * Generated room name.
-     */
-    generatedRoomname: string,
+  /**
+   * Current room name placeholder.
+   */
+  roomPlaceholder: string,
 
-    /**
-     * Current room name placeholder.
-     */
-    roomPlaceholder: string,
+  /**
+   * Timer for re-generating a new room name.
+   */
+  updateTimeoutId: ?TimeoutID,
 
-    /**
-     * Timer for re-generating a new room name.
-     */
-    updateTimeoutId: ?TimeoutID,
-
-    /**
-     * URL of the room to join.
-     * If this is not a url it will be treated as room name for default domain.
-     */
-    url: string;
+  /**
+   * URL of the room to join.
+   * If this is not a url it will be treated as room name for default domain.
+   */
+  url: string,
 };
 
 /**
  * Welcome Component.
  */
 class Welcome extends Component<Props, State> {
-    /**
-     * Initializes a new {@code Welcome} instance.
-     *
-     * @inheritdoc
-     */
-    constructor(props: Props) {
-        super(props);
+  /**
+   * Initializes a new {@code Welcome} instance.
+   *
+   * @inheritdoc
+   */
+  constructor(props: Props) {
+    super(props);
 
-        // Initialize url value in state if passed using location state object.
-        let url = '';
+    // Initialize url value in state if passed using location state object.
+    let url = "";
 
-        // Check and parse url if exists in location state.
-        if (props.location.state) {
-            const { room, serverURL } = props.location.state;
+    // Check and parse url if exists in location state.
+    if (props.location.state) {
+      const { room, serverURL } = props.location.state;
 
-            if (room && serverURL) {
-                url = `${serverURL}/${room}`;
-            }
-        }
-
-        this.state = {
-            animateTimeoutId: undefined,
-            generatedRoomname: '',
-            roomPlaceholder: '',
-            updateTimeoutId: undefined,
-            url
-        };
-
-        // Bind event handlers.
-        this._animateRoomnameChanging = this._animateRoomnameChanging.bind(this);
-        this._onURLChange = this._onURLChange.bind(this);
-        this._onFormSubmit = this._onFormSubmit.bind(this);
-        this._onJoin = this._onJoin.bind(this);
-        this._updateRoomname = this._updateRoomname.bind(this);
+      if (room && serverURL) {
+        url = `${serverURL}/${room}`;
+      }
     }
 
-    /**
-     * Start Onboarding once component is mounted.
-     * Start generating randdom room names.
-     *
-     * NOTE: It autonatically checks if the onboarding is shown or not.
-     *
-     * @returns {void}
-     */
-    componentDidMount() {
-        this.props.dispatch(startOnboarding('welcome-page'));
+    this.state = {
+      animateTimeoutId: undefined,
+      generatedRoomname: "",
+      roomPlaceholder: "",
+      updateTimeoutId: undefined,
+      url,
+    };
 
-        this._updateRoomname();
+    // Bind event handlers.
+    this._animateRoomnameChanging = this._animateRoomnameChanging.bind(this);
+    this._onURLChange = this._onURLChange.bind(this);
+    this._onFormSubmit = this._onFormSubmit.bind(this);
+    this._onJoin = this._onJoin.bind(this);
+    this._updateRoomname = this._updateRoomname.bind(this);
+  }
+
+  /**
+   * Start Onboarding once component is mounted.
+   * Start generating randdom room names.
+   *
+   * NOTE: It autonatically checks if the onboarding is shown or not.
+   *
+   * @returns {void}
+   */
+  componentDidMount() {
+    this.props.dispatch(startOnboarding("welcome-page"));
+
+    this._updateRoomname();
+  }
+
+  /**
+   * Stop all timers when unmounting.
+   *
+   * @returns {voidd}
+   */
+  componentWillUnmount() {
+    this._clearTimeouts();
+  }
+
+  /**
+   * Render function of component.
+   *
+   * @returns {ReactElement}
+   */
+  render() {
+    return (
+      <Page navigation={<Navbar />}>
+        <AtlasKitThemeProvider mode="light">
+          <Wrapper>
+            {this._renderHeader()}
+            {this._renderBody()}
+            <Onboarding section="welcome-page" />
+          </Wrapper>
+        </AtlasKitThemeProvider>
+      </Page>
+    );
+  }
+
+  _animateRoomnameChanging: (string) => void;
+
+  /**
+   * Animates the changing of the room name.
+   *
+   * @param {string} word - The part of room name that should be added to
+   * placeholder.
+   * @private
+   * @returns {void}
+   */
+  _animateRoomnameChanging(word: string) {
+    let animateTimeoutId;
+    const roomPlaceholder = this.state.roomPlaceholder + word.slice(0, 1);
+
+    if (word.length > 1) {
+      animateTimeoutId = setTimeout(() => {
+        this._animateRoomnameChanging(word.substring(1, word.length));
+      }, 70);
+    }
+    this.setState({
+      animateTimeoutId,
+      roomPlaceholder,
+    });
+  }
+
+  /**
+   * Method that clears timeouts for animations and updates of room name.
+   *
+   * @private
+   * @returns {void}
+   */
+  _clearTimeouts() {
+    clearTimeout(this.state.animateTimeoutId);
+    clearTimeout(this.state.updateTimeoutId);
+  }
+
+  _onFormSubmit: (*) => void;
+
+  /**
+   * Prevents submission of the form and delegates the join logic.
+   *
+   * @param {Event} event - Event by which this function is called.
+   * @returns {void}
+   */
+  _onFormSubmit(event: Event) {
+    event.preventDefault();
+    this._onJoin();
+  }
+
+  _onJoin: (*) => void;
+
+  /**
+   * Redirect and join conference.
+   *
+   * @returns {void}
+   */
+  _onJoin() {
+    const inputURL = this.state.url || this.state.generatedRoomname;
+    const conference = createConferenceObjectFromURL(inputURL);
+
+    // Don't navigate if conference couldn't be created
+    if (!conference) {
+      return;
     }
 
-    /**
-     * Stop all timers when unmounting.
-     *
-     * @returns {voidd}
-     */
-    componentWillUnmount() {
-        this._clearTimeouts();
-    }
+    this.props.dispatch(push("/conference", conference));
+  }
 
-    /**
-     * Render function of component.
-     *
-     * @returns {ReactElement}
-     */
-    render() {
-        return (
-            <Page navigation = { <Navbar /> }>
-                <AtlasKitThemeProvider mode = 'light'>
-                    <Wrapper>
-                        { this._renderHeader() }
-                        { this._renderBody() }
-                        <Onboarding section = 'welcome-page' />
-                    </Wrapper>
-                </AtlasKitThemeProvider>
-            </Page>
-        );
-    }
+  _onURLChange: (*) => void;
 
-    _animateRoomnameChanging: (string) => void;
+  /**
+   * Keeps URL input value and URL in state in sync.
+   *
+   * @param {SyntheticInputEvent<HTMLInputElement>} event - Event by which
+   * this function is called.
+   * @returns {void}
+   */
+  _onURLChange(event: SyntheticInputEvent<HTMLInputElement>) {
+    this.setState({
+      url: event.currentTarget.value,
+    });
+  }
 
-    /**
-     * Animates the changing of the room name.
-     *
-     * @param {string} word - The part of room name that should be added to
-     * placeholder.
-     * @private
-     * @returns {void}
-     */
-    _animateRoomnameChanging(word: string) {
-        let animateTimeoutId;
-        const roomPlaceholder = this.state.roomPlaceholder + word.slice(0, 1);
+  /**
+   * Renders the body for the welcome page.
+   *
+   * @returns {ReactElement}
+   */
+  _renderBody() {
+    return (
+      <Body>
+        <RecentList />
+      </Body>
+    );
+  }
 
-        if (word.length > 1) {
-            animateTimeoutId
-                = setTimeout(
-                    () => {
-                        this._animateRoomnameChanging(
-                            word.substring(1, word.length));
-                    },
-                    70);
-        }
-        this.setState({
-            animateTimeoutId,
-            roomPlaceholder
-        });
-    }
+  /**
+   * Renders the header for the welcome page.
+   *
+   * @returns {ReactElement}
+   */
+  _renderHeader() {
+    const locationState = this.props.location.state;
+    const locationError = locationState && locationState.error;
+    const { t, isAuthenticated, user } = this.props;
+    return (
+      <Header>
+        <SpotlightTarget name="conference-url">
+          <Form onSubmit={this._onFormSubmit}>
+            {isAuthenticated && user && (
+              <div
+                style={{
+                  marginBottom: "15px",
+                  fontSize: "16px",
+                  color: "#FFFFFF",
+                  fontWeight: "bold",
+                }}>
+                {t("Welcome")}, {user.name}
+              </div>
+            )}
+            <Label>{t("enterConferenceNameOrUrl")} </Label>
+            <FieldWrapper>
+              <FieldTextStateless
+                autoFocus={true}
+                isInvalid={locationError}
+                isLabelHidden={true}
+                onChange={this._onURLChange}
+                placeholder={this.state.roomPlaceholder}
+                shouldFitContainer={true}
+                type="text"
+                value={this.state.url}
+              />
+              <Button appearance="primary" onClick={this._onJoin} type="button">
+                {t("go")}
+              </Button>
+            </FieldWrapper>
+          </Form>
+        </SpotlightTarget>
+      </Header>
+    );
+  }
 
-    /**
-     * Method that clears timeouts for animations and updates of room name.
-     *
-     * @private
-     * @returns {void}
-     */
-    _clearTimeouts() {
-        clearTimeout(this.state.animateTimeoutId);
-        clearTimeout(this.state.updateTimeoutId);
-    }
+  _updateRoomname: () => void;
 
-    _onFormSubmit: (*) => void;
+  /**
+   * Triggers the generation of a new room name and initiates an animation of
+   * its changing.
+   *
+   * @protected
+   * @returns {void}
+   */
+  _updateRoomname() {
+    const generatedRoomname = generateRoomWithoutSeparator();
+    const roomPlaceholder = "";
+    const updateTimeoutId = setTimeout(this._updateRoomname, 10000);
 
-    /**
-     * Prevents submission of the form and delegates the join logic.
-     *
-     * @param {Event} event - Event by which this function is called.
-     * @returns {void}
-     */
-    _onFormSubmit(event: Event) {
-        event.preventDefault();
-        this._onJoin();
-    }
-
-    _onJoin: (*) => void;
-
-    /**
-     * Redirect and join conference.
-     *
-     * @returns {void}
-     */
-    _onJoin() {
-        const inputURL = this.state.url || this.state.generatedRoomname;
-        const conference = createConferenceObjectFromURL(inputURL);
-
-        // Don't navigate if conference couldn't be created
-        if (!conference) {
-            return;
-        }
-
-        this.props.dispatch(push('/conference', conference));
-    }
-
-    _onURLChange: (*) => void;
-
-    /**
-     * Keeps URL input value and URL in state in sync.
-     *
-     * @param {SyntheticInputEvent<HTMLInputElement>} event - Event by which
-     * this function is called.
-     * @returns {void}
-     */
-    _onURLChange(event: SyntheticInputEvent<HTMLInputElement>) {
-        this.setState({
-            url: event.currentTarget.value
-        });
-    }
-
-    /**
-     * Renders the body for the welcome page.
-     *
-     * @returns {ReactElement}
-     */
-    _renderBody() {
-        return (
-            <Body>
-                <RecentList />
-            </Body>
-        );
-    }
-
-    /**
-     * Renders the header for the welcome page.
-     *
-     * @returns {ReactElement}
-     */
-    _renderHeader() {
-        const locationState = this.props.location.state;
-        const locationError = locationState && locationState.error;
-        const { t } = this.props;
-
-        return (
-            <Header>
-                <SpotlightTarget name = 'conference-url'>
-                    <Form onSubmit = { this._onFormSubmit }>
-                        <Label>{ t('enterConferenceNameOrUrl') } </Label>
-                        <FieldWrapper>
-                            <FieldTextStateless
-                                autoFocus = { true }
-                                isInvalid = { locationError }
-                                isLabelHidden = { true }
-                                onChange = { this._onURLChange }
-                                placeholder = { this.state.roomPlaceholder }
-                                shouldFitContainer = { true }
-                                type = 'text'
-                                value = { this.state.url } />
-                            <Button
-                                appearance = 'primary'
-                                onClick = { this._onJoin }
-                                type = 'button'>
-                                { t('go') }
-                            </Button>
-                        </FieldWrapper>
-                    </Form>
-                </SpotlightTarget>
-            </Header>
-        );
-    }
-
-    _updateRoomname: () => void;
-
-    /**
-     * Triggers the generation of a new room name and initiates an animation of
-     * its changing.
-     *
-     * @protected
-     * @returns {void}
-     */
-    _updateRoomname() {
-        const generatedRoomname = generateRoomWithoutSeparator();
-        const roomPlaceholder = '';
-        const updateTimeoutId = setTimeout(this._updateRoomname, 10000);
-
-        this._clearTimeouts();
-        this.setState(
-            {
-                generatedRoomname,
-                roomPlaceholder,
-                updateTimeoutId
-            },
-            () => this._animateRoomnameChanging(generatedRoomname));
-    }
+    this._clearTimeouts();
+    this.setState(
+      {
+        generatedRoomname,
+        roomPlaceholder,
+        updateTimeoutId,
+      },
+      () => this._animateRoomnameChanging(generatedRoomname),
+    );
+  }
 }
 
-export default compose(connect(), withTranslation())(Welcome);
+function mapStateToProps(state) {
+  return {
+    isAuthenticated: state.auth.isAuthenticated,
+    user: state.auth.user,
+  };
+}
+
+export default compose(connect(mapStateToProps), withTranslation())(Welcome);

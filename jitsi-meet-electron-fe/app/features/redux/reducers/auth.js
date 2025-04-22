@@ -4,6 +4,7 @@ const DEFAULT_STATE = {
   isAuthenticated: false,
   accessToken: null,
   refreshToken: null,
+  user: null,
 };
 
 /**
@@ -21,6 +22,7 @@ export default function auth(state = DEFAULT_STATE, action) {
         isAuthenticated: true,
         accessToken: action.payload.accessToken,
         refreshToken: action.payload.refreshToken,
+        user: action.payload.user,
       };
     case AUTH_LOGOUT:
       return {
@@ -28,6 +30,7 @@ export default function auth(state = DEFAULT_STATE, action) {
         isAuthenticated: false,
         accessToken: null,
         refreshToken: null,
+        user: null,
       };
     default:
       return state;
