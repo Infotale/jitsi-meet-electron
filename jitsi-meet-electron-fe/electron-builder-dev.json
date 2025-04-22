@@ -2,15 +2,11 @@
   "appId": "org.noga.noga-meet",
   "productName": "Noga Meet Dev",
   "directories": {
-    "buildResources": "resources",
     "output": "dist-dev"
   },
-  "files": ["build/**/*", "electron-dev.js", "node_modules/**/*", "package.json"],
+  "files": ["build/**/*", "node_modules/**/*", "package.json"],
   "win": {
     "target": "nsis",
     "icon": "resources/icon.ico"
-  },
-  "extraMetadata": {
-    "main": "electron-dev.js"
   }
 }
