@@ -220,6 +220,12 @@ function createJitsiMeetWindow() {
   };
 
   const windowOpenHandler = ({ url, frameName }) => {
+    // // Handle our callback protocol
+    // if (url.startsWith("jitsi-meet://callback")) {
+    //   handleProtocolCall(url); // This will handle the tokens
+    //   return { action: "deny" };
+    // }
+
     const target = getPopupTarget(url, frameName);
 
     // Handle authentication URLs
@@ -301,26 +307,26 @@ function createJitsiMeetWindow() {
   // Block redirects.
   const allowedRedirects = ["http:", "https:", "ws:", "wss:"];
 
-  mainWindow.webContents.addListener("will-redirect", (ev, url) => {
-    const requestedUrl = new URL.URL(url);
+  // mainWindow.webContents.addListener("will-redirect", (ev, url) => {
+  //   const requestedUrl = new URL.URL(url);
 
-    if (!allowedRedirects.includes(requestedUrl.protocol)) {
-      console.warn(`Disallowing redirect to ${url}`);
-      ev.preventDefault();
-    }
-  });
+  //   if (!allowedRedirects.includes(requestedUrl.protocol)) {
+  //     console.warn(`Disallowing redirect to ${url}`);
+  //     ev.preventDefault();
+  //   }
+  // });
 
   // Block opening any external applications.
-  mainWindow.webContents.session.setPermissionRequestHandler((_, permission, callback, details) => {
-    if (permission === "openExternal") {
-      console.warn(`Disallowing opening ${details.externalURL}`);
-      callback(false);
+  // mainWindow.webContents.session.setPermissionRequestHandler((_, permission, callback, details) => {
+  //   if (permission === "openExternal") {
+  //     console.warn(`Disallowing opening ${details.externalURL}`);
+  //     callback(false);
 
-      return;
-    }
+  //     return;
+  //   }
 
-    callback(true);
-  });
+  //   callback(true);
+  // });
 
   initPopupsConfigurationMain(mainWindow);
   setupAlwaysOnTopMain(mainWindow, null, windowOpenHandler);
