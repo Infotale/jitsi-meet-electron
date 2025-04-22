@@ -27,7 +27,8 @@ export const handleCallback = async (req: Request, res: Response) => {
 
     if (isVerified.active) {
       const { ssoUser, refreshToken } = putCookies(tokenSet, res);
-      const redirectUrl = `${process.env.MAIN_APP_HOME_PAGE}?accessToken=${tokenSet.access_token}&refreshToken=${refreshToken}`;
+      // ?accessToken=${tokenSet.access_token}&refreshToken=${refreshToken}
+      const redirectUrl = `${process.env.MAIN_APP_HOME_PAGE}`;
       res.redirect(redirectUrl);
     } else {
       logger.error("Token invalid");

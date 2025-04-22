@@ -40,25 +40,25 @@ const PrivateComponent = ({ component: Component, ...rest }) => {
     };
 
     // Check if we have a token in URL params (after auth callback)
-    const urlParams = new URLSearchParams(window.location.search);
-    const accessToken = urlParams.get("accessToken");
+    // const urlParams = new URLSearchParams(window.location.search);
+    // const accessToken = urlParams.get("accessToken");
 
-    if (accessToken) {
-      // Store token
-      localStorage.setItem("jitsi_token", accessToken);
-      // Clean URL
-      window.history.replaceState({}, document.title, window.location.pathname);
-    } else {
-      // If no token, check auth
-      checkAuth();
-    }
+    // if (accessToken) {
+    //   // Store token
+    //   localStorage.setItem("jitsi_token", accessToken);
+    //   // Clean URL
+    //   window.history.replaceState({}, document.title, window.location.pathname);
+    // } else {
+    // If no token, check auth
+    checkAuth();
+    // }
   }, []);
 
   // If we have a token, render component
-  const token = localStorage.getItem("jitsi_token");
-  if (!token) {
-    return null; // or some loading state
-  }
+  // const token = localStorage.getItem("jitsi_token");
+  // if (!token) {
+  //   return null; // or some loading state
+  // }
 
   return <Component {...rest} />;
 };

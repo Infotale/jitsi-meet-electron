@@ -220,20 +220,23 @@ function createJitsiMeetWindow() {
   };
 
   const windowOpenHandler = ({ url, frameName }) => {
-    // // Handle our callback protocol
+    console.log("windowOpenHandler", url, frameName);
+    // Handle our callback protocol
     // if (url.startsWith("jitsi-meet://callback")) {
     //   handleProtocolCall(url); // This will handle the tokens
     //   return { action: "deny" };
     // }
 
-    const target = getPopupTarget(url, frameName);
+    // // Handle authentication URLs (keep this for the initial auth)
+    // if (url.includes("keycloak") || url.includes("auth/login")) {
+    //   // Open auth URLs in the default browser
+    //   require("electron").shell.openExternal(url);
+    //   return { action: "deny" };
+    // }
 
-    // Handle authentication URLs
-    if (url.includes("keycloak") || url.includes("auth") || url.includes("login")) {
-      // Open auth URLs in the default browser
-      require("electron").shell.openExternal(url);
-      return { action: "deny" };
-    }
+    return { action: "allow" };
+
+    const target = getPopupTarget(url, frameName);
 
     if (!target || target === "browser") {
       openExternalLink(url);
