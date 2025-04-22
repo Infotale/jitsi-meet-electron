@@ -5,12 +5,10 @@
     "buildResources": "resources",
     "output": "dist-dev"
   },
-  "files": ["build/**/*", "node_modules/**/*", "package.json"],
+  "files": ["build/**/*", "electron-dev.js", "node_modules/**/*", "package.json"],
   "win": {
     "target": "nsis",
     "icon": "resources/icon.ico"
   },
-  "extraMetadata": {
-    "main": "build/main.js"
-  }
+  "main": "electron-dev.js"
 }
