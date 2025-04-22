@@ -19,48 +19,110 @@ const API_URL = "http://localhost:3000";
  * Wrapper component to handle authentication
  */
 const PrivateComponent = ({ component: Component, ...rest }) => {
+  const [isAuthenticated, setIsAuthenticated] = React.useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = React.useState(true);
+  const authCheckPerformed = React.useRef(false);
+
   React.useEffect(() => {
+    // Only run this once
+    if (authCheckPerformed.current) return;
+    authCheckPerformed.current = true;
+
     const checkAuth = async () => {
+      console.log("Checking authentication");
+
+      // Check URL parameters first
+      const urlParams = new URLSearchParams(window.location.search);
+      const accessToken = urlParams.get("accessToken");
+      const refreshToken = urlParams.get("refreshToken");
+
+      if (accessToken) {
+        console.log("Found token in URL");
+        // Store tokens in localStorage or memory
+        localStorage.setItem("accessToken", accessToken);
+        if (refreshToken) {
+          localStorage.setItem("refreshToken", refreshToken);
+        }
+
+        // Clean up URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+
+        setIsAuthenticated(true);
+        setIsCheckingAuth(false);
+        return;
+      }
+
+      // If no URL tokens, check stored token
+      const storedToken = localStorage.getItem("accessToken");
+
+      if (!storedToken) {
+        console.log("No stored token, redirecting to login");
+        window.location.href = `${API_URL}/auth/login`;
+        return;
+      }
+
       try {
-        // First try to get auth URL
-        const loginResponse = await fetch(`${API_URL}/auth/login`, {
-          credentials: "include",
+        // Verify the stored token
+        const response = await fetch(`${API_URL}/auth/verify-token`, {
+          headers: {
+            Authorization: `Bearer ${storedToken}`,
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
         });
 
-        if (loginResponse.ok) {
-          const authUrl = await loginResponse.json();
-          // Simple redirect to auth URL
-          window.location.href = authUrl;
-        } else {
-          console.error("Failed to get auth URL");
+        if (response.ok) {
+          const data = await response.json();
+          if (data.authenticated) {
+            console.log("Stored token is valid");
+            setIsAuthenticated(true);
+            setIsCheckingAuth(false);
+            return;
+          }
         }
+
+        // If token verification failed, try refresh token
+        const refreshToken = localStorage.getItem("refreshToken");
+        if (refreshToken) {
+          const refreshResponse = await fetch(`${API_URL}/auth/refresh-token`, {
+            headers: {
+              Authorization: `Bearer ${refreshToken}`,
+              Accept: "application/json",
+              "Content-Type": "application/json",
+            },
+          });
+
+          if (refreshResponse.ok) {
+            const refreshData = await refreshResponse.json();
+            localStorage.setItem("accessToken", refreshData.accessToken);
+            if (refreshData.refreshToken) {
+              localStorage.setItem("refreshToken", refreshData.refreshToken);
+            }
+            setIsAuthenticated(true);
+            setIsCheckingAuth(false);
+            return;
+          }
+        }
+
+        // If we get here, authentication failed
+        console.log("Authentication failed, redirecting to login");
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
+        window.location.href = `${API_URL}/auth/login`;
       } catch (error) {
         console.error("Auth check failed:", error);
+        setIsCheckingAuth(false);
       }
     };
 
-    // Check if we have a token in URL params (after auth callback)
-    // const urlParams = new URLSearchParams(window.location.search);
-    // const accessToken = urlParams.get("accessToken");
-
-    // if (accessToken) {
-    //   // Store token
-    //   localStorage.setItem("jitsi_token", accessToken);
-    //   // Clean URL
-    //   window.history.replaceState({}, document.title, window.location.pathname);
-    // } else {
-    // If no token, check auth
     checkAuth();
-    // }
   }, []);
 
-  // If we have a token, render component
-  // const token = localStorage.getItem("jitsi_token");
-  // if (!token) {
-  //   return null; // or some loading state
-  // }
+  if (isCheckingAuth) {
+    return <div>Checking authentication...</div>;
+  }
 
-  return <Component {...rest} />;
+  return isAuthenticated ? <Component {...rest} /> : <div>Redirecting to login...</div>;
 };
 
 /**
@@ -86,11 +148,16 @@ class App extends Component<*> {
    * @returns {void}
    */
   componentDidMount() {
-    // start listening on this events
-    window.jitsiNodeAPI.ipc.on("protocol-data-msg", this._listenOnProtocolMessages);
+    // Check if we're in Electron or browser environment
+    if (window.jitsiNodeAPI && window.jitsiNodeAPI.ipc) {
+      // start listening on this events
+      window.jitsiNodeAPI.ipc.on("protocol-data-msg", this._listenOnProtocolMessages);
 
-    // send notification to main process
-    window.jitsiNodeAPI.ipc.send("renderer-ready");
+      // send notification to main process
+      window.jitsiNodeAPI.ipc.send("renderer-ready");
+    } else {
+      console.log("Not in Electron environment, skipping IPC setup");
+    }
   }
 
   /**
@@ -99,8 +166,11 @@ class App extends Component<*> {
    * @returns {void}
    */
   componentWillUnmount() {
-    // remove listening for this events
-    window.jitsiNodeAPI.ipc.removeListener("protocol-data-msg", this._listenOnProtocolMessages);
+    // Check if we're in Electron or browser environment
+    if (window.jitsiNodeAPI && window.jitsiNodeAPI.ipc) {
+      // remove listening for this events
+      window.jitsiNodeAPI.ipc.removeListener("protocol-data-msg", this._listenOnProtocolMessages);
+    }
   }
 
   _listenOnProtocolMessages: (*) => void;

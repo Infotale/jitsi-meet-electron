@@ -1,11 +1,13 @@
 import { Request, Response } from "express";
 import { Client } from "openid-client";
 import { configureClient } from "../config/auth.config";
-import { putCookies } from "../services/auth.service";
 import logger from "../utils/logger";
 
 let client: Client;
 
+/**
+ * Initiates the login process by redirecting the user to the Identity Provider.
+ */
 export const getAuthUrl = async (req: Request, res: Response) => {
   try {
     client = await configureClient();
@@ -13,78 +15,108 @@ export const getAuthUrl = async (req: Request, res: Response) => {
       redirect_uri: process.env.SSO_COMEBACK_URL!,
       scope: "openid profile email",
     });
-    res.json(authorizationUrl);
+    // Directly redirect the user to the auth URL
+    res.redirect(authorizationUrl);
   } catch (error) {
     logger.error("Failed to configure SSO client", error);
-    return res.status(500).json({ error: "Failed to configure SSO client" });
+    return res.status(500).send("Failed to initiate login process.");
   }
 };
 
+/**
+ * Handles the login callback, exchanges the code, and authenticates the user.
+ */
 export const handleCallback = async (req: Request, res: Response) => {
   try {
     const tokenSet = await client.callback(process.env.SSO_COMEBACK_URL!, req.query);
     const isVerified = await client.introspect(tokenSet.access_token!);
 
     if (isVerified.active) {
-      const { ssoUser, refreshToken } = putCookies(tokenSet, res);
-      // ?accessToken=${tokenSet.access_token}&refreshToken=${refreshToken}
-      const redirectUrl = `${process.env.MAIN_APP_HOME_PAGE}`;
+      // Set HTTP-only cookies for security
+      res.cookie("session_token", tokenSet.access_token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+      });
+
+      if (tokenSet.refresh_token) {
+        res.cookie("refresh_token", tokenSet.refresh_token, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "strict",
+        });
+      }
+
+      // Redirect to the main app without exposing tokens in URL
+      const redirectUrl = `${process.env.MAIN_APP_HOME_PAGE}?accessToken=${tokenSet.access_token}&refreshToken=${tokenSet.refresh_token}`;
+
       res.redirect(redirectUrl);
     } else {
       logger.error("Token invalid");
-      res.status(401).send("Token is not active");
+      res.status(401).send("Authentication failed.");
     }
   } catch (error) {
     logger.error("Failed to authenticate", error);
-    res.status(500).send("Internal Server Error");
+    res.status(500).send("Authentication failed.");
   }
 };
 
+/**
+ * Refreshes the user's access token using the refresh token.
+ */
 export const refreshTokenHandler = async (req: Request, res: Response) => {
   try {
     client = await configureClient();
-    const authHeader = req.headers?.authorization;
+
+    // Get refresh token from Authorization header
+    const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return res.status(400).send("Authorization header missing or incorrect");
+      return res.status(400).json({ message: "No refresh token provided" });
     }
 
-    const curRefreshToken = authHeader.split(" ")[1];
-    const isRefreshedVerified = await client.introspect(curRefreshToken);
+    const refreshToken = authHeader.split(" ")[1];
+    const isRefreshedVerified = await client.introspect(refreshToken);
 
     if (isRefreshedVerified?.active) {
-      const refreshedTokenSet = await client.refresh(curRefreshToken);
-      const { ssoUser, refreshToken } = putCookies(refreshedTokenSet, res);
-      res.send({
-        accessToken: refreshedTokenSet.access_token!,
-        refreshToken,
-        isValid: true,
+      const refreshedTokenSet = await client.refresh(refreshToken);
+
+      res.status(200).json({
+        accessToken: refreshedTokenSet.access_token,
+        refreshToken: refreshedTokenSet.refresh_token,
       });
     } else {
-      res.status(401).send({ isValid: false });
+      res.status(401).json({ message: "Invalid refresh token" });
     }
   } catch (error) {
     logger.error("Failed to refresh token", error);
-    res.status(401).send("Refresh token is not active");
+    res.status(401).json({ message: "Failed to refresh token" });
   }
 };
 
+/**
+ * Verifies the session or access token.
+ */
 export const verifyToken = async (req: Request, res: Response) => {
   try {
     client = await configureClient();
-    const token = req.headers?.authorization?.split(" ")[1];
-    if (!token) {
-      return res.status(401).json({ message: "No token provided" });
+
+    // Get token from Authorization header
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res.status(401).json({ authenticated: false, message: "No token provided" });
     }
 
+    const token = authHeader.split(" ")[1];
     const isVerified = await client.introspect(token);
+
     if (isVerified.active) {
       const userClaims = await client.userinfo(token);
-      res.status(200).json(userClaims);
+      res.status(200).json({ authenticated: true, user: userClaims });
     } else {
-      res.status(401).json({ message: "Invalid token" });
+      res.status(401).json({ authenticated: false, message: "Invalid or expired token" });
     }
   } catch (error) {
     logger.error("Token verification failed", error);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(401).json({ authenticated: false, message: "Invalid or expired token" });
   }
 };

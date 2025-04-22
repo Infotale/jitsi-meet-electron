@@ -12,7 +12,13 @@
     "build": "webpack --config ./webpack.main.js --mode production && webpack --config ./webpack.renderer.js --mode production",
     "dist": "npm run build && electron-builder",
     "postinstall": "patch-package",
-    "watch": "webpack --config ./webpack.renderer.js --mode development --watch --watch-options-poll=1000"
+    "watch": "webpack --config ./webpack.renderer.js --mode development --watch --watch-options-poll=1000",
+    "start:dev": "concurrently \"npm:start:react\" \"npm:start:electron\"",
+    "start:react": "webpack serve --config ./webpack.dev.js",
+    "start:electron": "webpack --config ./webpack.main.js --mode development && electron ./build/main.js",
+    "localhost": "node dev-server.js",
+    "start:web": "webpack serve --config webpack.dev.js  --mode development",
+    "electron:dev": "node electron-dev.js"
   },
   "engines": {
     "node": ">=14.0.0"
@@ -163,6 +169,7 @@
     "@svgr/webpack": "^6.2.1",
     "babel-eslint": "10.0.3",
     "babel-loader": "^8.2.3",
+    "buffer": "^6.0.3",
     "concurrently": "5.1.0",
     "css-loader": "^6.7.1",
     "electron": "35.1.5",
@@ -187,6 +194,7 @@
     "moment": "^2.29.2",
     "mousetrap": "^1.6.5",
     "patch-package": "6.5.1",
+    "process": "^0.11.10",
     "react": "^16.14.0",
     "react-dom": "^16.14.0",
     "react-i18next": "^11.8.12",
@@ -199,6 +207,7 @@
     "style-loader": "^3.3.1",
     "styled-components": "^3.4.10",
     "webpack": "^5.94.0",
-    "webpack-cli": "^4.9.2"
+    "webpack-cli": "^4.9.2",
+    "webpack-dev-server": "^5.2.1"
   }
 }

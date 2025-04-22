@@ -21,8 +21,7 @@ const config = require("./app/features/config");
 const { openExternalLink } = require("./app/features/utils/openExternalLink");
 const pkgJson = require("./package.json");
 
-const showDevTools =
-  Boolean(process.env.SHOW_DEV_TOOLS) || process.argv.indexOf("--show-dev-tools") > -1;
+const showDevTools = true; // Always show dev tools in development mode
 
 // For enabling remote control, please change the ENABLE_REMOTE_CONTROL flag in
 // app/features/conference/components/Conference.js to true as well
@@ -191,11 +190,13 @@ function createJitsiMeetWindow() {
   const basePath = isDev ? __dirname : app.getAppPath();
 
   // URL for index.html which will be our entry point.
-  const indexURL = URL.format({
-    pathname: path.resolve(basePath, "./build/index.html"),
-    protocol: "file:",
-    slashes: true,
-  });
+  const indexURL =
+    process.env.JITSI_MEET_LOCALHOST_URL ||
+    URL.format({
+      pathname: path.resolve(basePath, "./build/index.html"),
+      protocol: "file:",
+      slashes: true,
+    });
 
   // Options used when creating the main Jitsi Meet window.
   // Use a preload script in order to provide node specific functionality

@@ -8,13 +8,18 @@ import logger from "./utils/logger";
 const app = express();
 const port = process.env.PORT || 3000;
 
-import dotenv from "dotenv";
+import dotenv, { config } from "dotenv";
 
 // Before importing and running anything we should import .env
 dotenv.config();
 
 // Middleware
-app.use(cors());
+app.use(
+  cors({
+    origin: ["http://localhost:3001"], // Allow both origins
+    credentials: true, // Allow cookies
+  }),
+);
 app.use(express.json());
 app.use(
   session({
