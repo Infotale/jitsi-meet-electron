@@ -1,9 +1,9 @@
 {
   "name": "jitsi-meet-electron",
   "version": "2025.4.0",
-  "description": "Electron application for Jitsi Meet",
+  "description": "Electron application for Noga Meet",
   "main": "./build/main.js",
-  "productName": "Jitsi Meet",
+  "productName": "Noga Meet",
   "private": true,
   "scripts": {
     "start": "webpack --config ./webpack.main.js --mode development && concurrently \"npm:watch\" \"electron ./build/main.js\"",
@@ -19,7 +19,7 @@
   },
   "build": {
     "appId": "org.jitsi.jitsi-meet",
-    "productName": "Jitsi Meet",
+    "productName": "Noga Meet",
     "generateUpdatesFilesForAllChannels": true,
     "npmRebuild": false,
     "files": [
@@ -47,8 +47,8 @@
       "entitlementsInherit": "entitlements.mac.plist",
       "asarUnpack": "**/*.node",
       "extendInfo": {
-        "NSCameraUsageDescription": "Jitsi Meet requires access to your camera in order to make video-calls.",
-        "NSMicrophoneUsageDescription": "Jitsi Meet requires access to your microphone in order to make calls (audio/video).",
+        "NSCameraUsageDescription": "Noga Meet requires access to your camera in order to make video-calls.",
+        "NSMicrophoneUsageDescription": "Noga Meet requires access to your microphone in order to make calls (audio/video).",
         "LSMultipleInstancesProhibited": true
       }
     },
@@ -60,7 +60,7 @@
     "linux": {
       "artifactName": "jitsi-meet-${arch}.${ext}",
       "category": "VideoConference;AudioVideo;Audio;Video;Network",
-      "description": "Jitsi Meet Desktop App",
+      "description": "Noga Meet Desktop App",
       "executableName": "jitsi-meet",
       "target": [
         {
