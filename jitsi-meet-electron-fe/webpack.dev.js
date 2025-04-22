@@ -154,6 +154,10 @@ module.exports = {
     warningsFilter: [
       // Ignore warnings about named exports
       /export '(version|packageName|packageVersion)'/,
+      // Add these new patterns
+      /Should not import the named export/,
+      /@atlaskit\/toggle/,
+      /only default export is available soon/,
     ],
   },
 
