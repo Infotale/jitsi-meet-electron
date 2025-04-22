@@ -13,4 +13,8 @@ export default styled.div`
     color: black;
     margin: 1rem;
     padding: 1rem;
+    
+    &:hover {
+        cursor: pointer;
+    }
 `;

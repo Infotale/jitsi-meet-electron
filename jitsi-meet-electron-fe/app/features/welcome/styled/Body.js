@@ -6,7 +6,7 @@ export default styled.div`
     display: flex;
     flex-direction: row;
     justify-content: space-evenly;
-    align-items: center;
+    align-items: flex-start;
     overflow: scroll;
 
     ::-webkit-scrollbar {

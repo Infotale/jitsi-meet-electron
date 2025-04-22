@@ -16,6 +16,8 @@ import {
 } from '../styled';
 import type { MeetingItem } from '../types';
 import { getMeetings } from '../meetings';
+import clockIcon from '../../../images/clock.png';
+import locationIcon from '../../../images/location.png';
 
 /**
  * Recent List Component.
@@ -59,10 +61,16 @@ class UpcomingMeetings extends Component<Props, *> {
                 </MeetingDate>
                 <Wrapper className={"rows"}>
                     <MeetingTime>
-                        <span>{ this._renderTime(meeting.startDate) } - { this._renderTime(meeting.endDate) }</span>
+                        <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+                            <img alt="location" src={clockIcon} style={{ height: "15px", marginRight: "5px" }} />
+                            <span>{ this._renderTime(meeting.startDate) } - { this._renderTime(meeting.endDate) }</span>
+                        </div>
                     </MeetingTime>
                     <MeetingLocation>
-                        <span>{ meeting.location }</span>
+                        <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+                            <img alt="location" src={locationIcon} style={{ height: "15px", marginRight: "5px" }} />
+                            <span>{ meeting.location }</span>
+                        </div>
                     </MeetingLocation>
                 </Wrapper>
                 <Wrapper className={"rows"}>
