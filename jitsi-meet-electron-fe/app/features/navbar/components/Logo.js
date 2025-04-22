@@ -1,10 +1,6 @@
 // @flow
-
-import Icon from '@atlaskit/icon';
-
 import React, { Component } from 'react';
-
-import LogoSVG from '../../../images/logo.svg';
+import LogoSVG from '../../../images/infotale.png';
 
 /**
  * Logo component.
@@ -17,11 +13,6 @@ export default class Logo extends Component<*> {
      * @returns {ReactElement}
      */
     render() {
-        return (
-            <Icon
-                glyph = { LogoSVG }
-                size = 'xlarge' />
-        );
+        return <img src={LogoSVG} alt="Infotale Logo" style={{ width: "40px" }} />;
     }
 }
-

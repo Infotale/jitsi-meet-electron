@@ -9,8 +9,8 @@ import { AtlasKitThemeProvider } from "@atlaskit/theme";
 import { generateRoomWithoutSeparator } from "@jitsi/js-utils/random";
 import React, { Component } from "react";
 import { withTranslation } from "react-i18next";
-import { compose } from "redux";
 import type { Dispatch } from "redux";
+import { compose } from "redux";
 import { connect } from "react-redux";
 import { push } from "react-router-redux";
 
@@ -20,6 +20,7 @@ import { RecentList } from "../../recent-list";
 import { createConferenceObjectFromURL } from "../../utils";
 
 import { Body, FieldWrapper, Form, Header, Label, Wrapper } from "../styled";
+import { UpcomingMeetings } from "../../upcoming-meetings";
 
 type Props = {
   /**
@@ -280,12 +281,109 @@ class Welcome extends Component<Props, State> {
                 style={{
                   marginBottom: "15px",
                   fontSize: "16px",
-                  color: "#FFFFFF",
+                  color: "#000000",
                   fontWeight: "bold",
                 }}>
                 {t("Welcome")}, {user.name}
               </div>
             )}
+            <Label>{t("enterConferenceNameOrUrl")} </Label>
+            <FieldWrapper>
+              <FieldTextStateless
+                autoFocus={true}
+                isInvalid={locationError}
+                isLabelHidden={true}
+                onChange={this._onURLChange}
+                placeholder={this.state.roomPlaceholder}
+                shouldFitContainer={true}
+                type="text"
+                value={this.state.url}
+              />
+              <Button appearance="primary" onClick={this._onJoin} type="button">
+                {t("go")}
+              </Button>
+            </FieldWrapper>
+          </Form>
+        </SpotlightTarget>
+      </Header>
+    );
+  }
+
+  _updateRoomname: () => void;
+
+  /**
+   * Prevents submission of the form and delegates the join logic.
+   *
+   * @param {Event} event - Event by which this function is called.
+   * @returns {void}
+   */
+  _onFormSubmit(event: Event) {
+    event.preventDefault();
+    this._onJoin();
+  }
+
+  _onJoin: (*) => void;
+
+  /**
+   * Redirect and join conference.
+   *
+   * @returns {void}
+   */
+  _onJoin() {
+    const inputURL = this.state.url || this.state.generatedRoomname;
+    const conference = createConferenceObjectFromURL(inputURL);
+
+    // Don't navigate if conference couldn't be created
+    if (!conference) {
+      return;
+    }
+
+    this.props.dispatch(push("/conference", conference));
+  }
+
+  _onURLChange: (*) => void;
+
+  /**
+   * Keeps URL input value and URL in state in sync.
+   *
+   * @param {SyntheticInputEvent<HTMLInputElement>} event - Event by which
+   * this function is called.
+   * @returns {void}
+   */
+  _onURLChange(event: SyntheticInputEvent<HTMLInputElement>) {
+    this.setState({
+      url: event.currentTarget.value,
+    });
+  }
+
+  /**
+   * Renders the body for the welcome page.
+   *
+   * @returns {ReactElement}
+   */
+  _renderBody() {
+    return (
+      <Body>
+        <RecentList />
+        <UpcomingMeetings />
+      </Body>
+    );
+  }
+
+  /**
+   * Renders the header for the welcome page.
+   *
+   * @returns {ReactElement}
+   */
+  _renderHeader() {
+    const locationState = this.props.location.state;
+    const locationError = locationState && locationState.error;
+    const { t } = this.props;
+
+    return (
+      <Header>
+        <SpotlightTarget name="conference-url">
+          <Form onSubmit={this._onFormSubmit}>
             <Label>{t("enterConferenceNameOrUrl")} </Label>
             <FieldWrapper>
               <FieldTextStateless

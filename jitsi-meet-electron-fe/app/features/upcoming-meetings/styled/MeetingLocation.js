@@ -3,8 +3,9 @@
 import styled from 'styled-components';
 
 export default styled.div`
-    background: white;
     display: flex;
+    flex: 1;
     flex-direction: column;
-    height: 100vh;
+    justify-content: center;
+    align-items: center;
 `;

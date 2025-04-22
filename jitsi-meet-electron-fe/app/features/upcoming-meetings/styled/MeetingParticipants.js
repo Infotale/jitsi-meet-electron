@@ -4,12 +4,14 @@ import styled from 'styled-components';
 
 export default styled.div`
     display: flex;
+    flex: 1;
     flex-direction: row;
-    justify-content: space-evenly;
+    gap: 0.5rem;
+    justify-content: center;
     align-items: center;
-    overflow: scroll;
-
-    ::-webkit-scrollbar {
-        display: none;
+    
+    img {
+        height: 30px;
+        border-radius: 50%;
     }
 `;
