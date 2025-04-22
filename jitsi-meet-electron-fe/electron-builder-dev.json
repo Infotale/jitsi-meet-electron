@@ -12,8 +12,5 @@
   },
   "extraMetadata": {
     "main": "build/main.js"
-  },
-  "env": {
-    "JITSI_MEET_LOCALHOST_URL": "http://localhost:3001"
   }
 }
