@@ -10,5 +10,7 @@
     "target": "nsis",
     "icon": "resources/icon.ico"
   },
-  "main": "electron-dev.js"
+  "extraMetadata": {
+    "main": "electron-dev.js"
+  }
 }
