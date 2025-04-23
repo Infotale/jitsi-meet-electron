@@ -8,4 +8,9 @@ export default styled.div`
     flex-direction: row;
     justify-content: center;
     align-items: center;
+    
+    img {
+        height: 1rem;
+        margin-right: 0.5rem;
+    }
 `;

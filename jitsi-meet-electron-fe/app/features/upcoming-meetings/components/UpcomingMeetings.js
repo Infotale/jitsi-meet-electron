@@ -3,6 +3,7 @@ import moment from 'moment';
 import React, { Component } from 'react';
 import { withTranslation } from 'react-i18next';
 import { connect } from 'react-redux';
+import type { Dispatch } from 'redux';
 import { compose } from 'redux';
 import {
     MeetingCard,
@@ -18,6 +19,21 @@ import type { MeetingItem } from '../types';
 import { getMeetings } from '../meetings';
 import clockIcon from '../../../images/clock.png';
 import locationIcon from '../../../images/location.png';
+import type { RecentListItem } from '../../recent-list/types';
+import { push } from 'react-router-redux';
+
+type Props = {
+
+    /**
+     * Redux dispatch.
+     */
+    dispatch: Dispatch<*>;
+
+    /**
+     * I18next translation function.
+     */
+    t: Function;
+};
 
 /**
  * Recent List Component.
@@ -54,27 +70,23 @@ class UpcomingMeetings extends Component<Props, *> {
      */
     _renderRecentListEntry(meeting: MeetingItem) {
         return (
-            <MeetingCard key={meeting.id}>
+            <MeetingCard key={meeting.id} onClick={this._onNavigateToConference(meeting)}>
                 <MeetingDate>
                     <span className={"dayOfWeek"}>{ this._renderTodayDayOfAWeek(meeting.startDate) }</span>
                     <span className={"day"}>{ this._renderTodayDay(meeting.startDate) }</span>
                 </MeetingDate>
                 <Wrapper className={"rows"}>
                     <MeetingTime>
-                        <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-                            <img alt="location" src={clockIcon} style={{ height: "15px", marginRight: "5px" }} />
-                            <span>{ this._renderTime(meeting.startDate) } - { this._renderTime(meeting.endDate) }</span>
-                        </div>
+                        <img alt="location" src={clockIcon} />
+                        <span>{ this._renderTime(meeting.startDate) } - { this._renderTime(meeting.endDate) }</span>
                     </MeetingTime>
                     <MeetingLocation>
-                        <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-                            <img alt="location" src={locationIcon} style={{ height: "15px", marginRight: "5px" }} />
-                            <span>{ meeting.location }</span>
-                        </div>
+                        <img alt="location" src={locationIcon} />
+                        <span>{ meeting.location }</span>
                     </MeetingLocation>
                 </Wrapper>
                 <Wrapper className={"rows"}>
-                    <MeetingDescription>{ meeting.title }</MeetingDescription>
+                    <MeetingDescription>{ meeting.room }</MeetingDescription>
                     <MeetingParticipants>
                         {meeting.participants.map((participant) => {
                             return (
@@ -85,6 +97,10 @@ class UpcomingMeetings extends Component<Props, *> {
                 </Wrapper>
             </MeetingCard>
         );
+    }
+
+    _onNavigateToConference(meeting: MeetingItem) {
+        return () => this.props.dispatch(push('/conference', meeting));
     }
 
     _renderTime(date: Date){

@@ -2,7 +2,7 @@
 
 export type MeetingItem = {
     id: string;
-    title: string;
+    room: string;
     startDate: Date;
     endDate: Date;
     location: string;
