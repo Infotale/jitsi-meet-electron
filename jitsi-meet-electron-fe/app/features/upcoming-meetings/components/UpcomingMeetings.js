@@ -20,6 +20,7 @@ import clockIcon from '../../../images/clock.png';
 import locationIcon from '../../../images/location.png';
 import type { RecentListItem } from '../../recent-list/types';
 import { push } from 'react-router-redux';
+import { Label } from '../../recent-list';
 
 type Props = {
 
@@ -53,6 +54,7 @@ class UpcomingMeetings extends Component<Props, *> {
         return (
             <Wrapper>
                 <UpcomingMeetingsContainer>
+                    <Label>{ this.props.t('upcomingMeetings') }</Label>
                     {
                         meetings.map(meeting => this._renderRecentListEntry(meeting))
                     }
