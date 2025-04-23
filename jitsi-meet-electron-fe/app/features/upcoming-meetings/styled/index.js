@@ -3,7 +3,6 @@ export { default as UpcomingMeetingsContainer } from './UpcomingMeetingsContaine
 export { default as MeetingCard } from './MeetingCard';
 export { default as MeetingDate } from './MeetingDate';
 export { default as MeetingDescription } from './MeetingDescription';
-export { default as MeetingLocation }  from './MeetingLocation';
-export { default as MeetingTime } from './MeetingTime';
+export { default as MeetingInfo }  from './MeetingInfo';
 export { default as MeetingParticipants } from './MeetingParticipants';
 

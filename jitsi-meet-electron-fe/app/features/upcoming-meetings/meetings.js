@@ -33,7 +33,7 @@ export function getMeetings() {
         {
             id: '5',
             room: 'Tech Deep Dive',
-            startDate: moment().set({ hour: 14, minute: 0, second: 0, millisecond: 0 }),
+            startDate: moment().set({ hour: 14, minute: 0, second: 0, millisecond: 0 }).add(1, 'days'),
             endDate: moment().set({ hour: 15, minute: 30, second: 0, millisecond: 0 }),
             location: 'Conference Room B',
             participants: [

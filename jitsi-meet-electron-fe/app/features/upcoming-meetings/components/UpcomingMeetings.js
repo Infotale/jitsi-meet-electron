@@ -9,9 +9,8 @@ import {
     MeetingCard,
     MeetingDate,
     MeetingDescription,
-    MeetingLocation,
+    MeetingInfo,
     MeetingParticipants,
-    MeetingTime,
     UpcomingMeetingsContainer,
     Wrapper
 } from '../styled';
@@ -71,19 +70,19 @@ class UpcomingMeetings extends Component<Props, *> {
     _renderRecentListEntry(meeting: MeetingItem) {
         return (
             <MeetingCard key={meeting.id} onClick={this._onNavigateToConference(meeting)}>
-                <MeetingDate>
-                    <span className={"dayOfWeek"}>{ this._renderTodayDayOfAWeek(meeting.startDate) }</span>
+                <MeetingDate isToday={moment().isSame(meeting.startDate, 'day')}>
+                    <span>{ this._renderTodayDayOfAWeek(meeting.startDate) }</span>
                     <span className={"day"}>{ this._renderTodayDay(meeting.startDate) }</span>
                 </MeetingDate>
                 <Wrapper className={"rows"}>
-                    <MeetingTime>
-                        <img alt="location" src={clockIcon} />
+                    <MeetingInfo>
+                        <img alt="time" src={clockIcon} />
                         <span>{ this._renderTime(meeting.startDate) } - { this._renderTime(meeting.endDate) }</span>
-                    </MeetingTime>
-                    <MeetingLocation>
+                    </MeetingInfo>
+                    <MeetingInfo>
                         <img alt="location" src={locationIcon} />
                         <span>{ meeting.location }</span>
-                    </MeetingLocation>
+                    </MeetingInfo>
                 </Wrapper>
                 <Wrapper className={"rows"}>
                     <MeetingDescription>{ meeting.room }</MeetingDescription>
